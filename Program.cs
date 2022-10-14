@@ -13,36 +13,41 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("",()=>{
+app.MapGet("", () =>
+{
 
     return Results.Redirect("/swagger/index.html");
 });
 
-app.MapGet("v1/todos", (AppDbContext context) => {
+app.MapGet("v1/todos", (AppDbContext context) =>
+{
     var todos = context.Todos.ToList();
     return Results.Ok(todos);
 }).Produces<Todo>();
 
 app.MapPost("v1/todos", (
     AppDbContext context,
-    CreateTodoViewModel model) => {
+    CreateTodoViewModel model) =>
+{
 
-        var todo = model.MapTo();
-        if(!model.IsValid)
-            return Results.BadRequest(model.Notifications);
+    var todo = model.MapTo();
+    if (!model.IsValid)
+        return Results.BadRequest(model.Notifications);
 
-        context.Todos.Add(todo);
-        context.SaveChanges();
+    context.Todos.Add(todo);
+    context.SaveChanges();
 
-        return Results.Created($"/v1/todos/{todo.Id}",todo);
+    return Results.Created($"/v1/todos/{todo.Id}", todo);
 }).Produces<Todo>();
 
 
-app.MapGet("v1/todos/{id:Guid}",([FromRoute] Guid id, AppDbContext context) =>
+app.MapGet("v1/todos/{id:Guid}", ([FromRoute] Guid id, AppDbContext context) =>
 {
-        var todo = context.Todos.FirstOrDefault(x => x.Id == id);
-        return Results.Ok(todo);
-} );
+    var todo = context.Todos.FirstOrDefault(x => x.Id == id);
+    if (todo == null)
+        return Results.NotFound();
+    return Results.Ok(todo);
+}).Produces<Todo>();
 
 
 
