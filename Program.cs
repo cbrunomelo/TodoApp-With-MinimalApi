@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using minitodo.Data;
 using minitodo.ViewModel;
 using Models;
@@ -35,5 +36,15 @@ app.MapPost("v1/todos", (
 
         return Results.Created($"/v1/todos/{todo.Id}",todo);
 }).Produces<Todo>();
+
+
+app.MapGet("v1/todos/{id:Guid}",([FromRoute] Guid id, AppDbContext context) =>
+{
+        var todo = context.Todos.FirstOrDefault(x => x.Id == id);
+        return Results.Ok(todo);
+} );
+
+
+
 
 app.Run();
